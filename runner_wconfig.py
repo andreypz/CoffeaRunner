@@ -1,6 +1,4 @@
-import os, sys, json, argparse, time, pickle
-
-
+import os, sys, json, argparse, time, pickle, getpass
 import numpy as np
 
 import uproot
@@ -109,6 +107,8 @@ if __name__ == "__main__":
                 os.system(f"rm {fi}")
         sys.exit(0)
 
+        
+    USERNAME = getpass.getuser()
     if config.run_options["executor"] not in [
         "futures",
         "iterative",
@@ -240,17 +240,17 @@ if __name__ == "__main__":
                     retry_handler=retry_handler,
                 )
         elif "condor" in config.run_options["executor"]:
-            ## code source: https://github.com/cms-rwth/CoffeaRunner/commit/d5ef86f76723e75b67bb212c3644c4012cae05be (Annika Stein)
             if "naf_lite" in config.run_options["executor"]:
                 config.run_options["mem_per_worker"] = 2
                 config.run_options["walltime"] = "03:00:00"
+
             htex_config = Config(
                 executors=[
                     HighThroughputExecutor(
                         label="coffea_parsl_condor",
                         address=address_by_query(),
                         max_workers=1,
-                        worker_debug=True,
+                        worker_debug=False,
                         provider=CondorProvider(
                             nodes_per_block=1,
                             cores_per_slot=config.run_options["workers"],
@@ -265,6 +265,7 @@ if __name__ == "__main__":
                 ],
                 retries=config.run_options["retries"],
                 retry_handler=retry_handler,
+                run_dir="/tmp/"+USERNAME+"/parsl_runinfo",
             )
             if config.run_options["splitjobs"]:
                 htex_config = Config(

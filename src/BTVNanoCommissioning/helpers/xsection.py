@@ -1026,6 +1026,20 @@ xsection = [
         "comment": "Z->MuMu ZptWeighted",
     },
     {
+        "process_name": "DYJetsToEE_M-50_TuneCP5_ZptWeighted_13TeV-powhegMiNNLO-pythia8-photos",
+        "cross_section": "1976",
+        "DAS": "DYJetsToEE_M-50_TuneCP5_ZptWeighted_13TeV-powhegMiNNLO-pythia8-photos/*/NANOAODSIM",
+        "energy": "13",
+        "comment": "Z->EE ZptWeighted",
+    },
+    {
+        "process_name": "DYjetstomumu_01234jets_Pt-0ToInf_13TeV-sherpa",
+        "cross_section": "1976",
+        "DAS": "DYjetstomumu_01234jets_Pt-0ToInf_13TeV-sherpa/*/NANOAODSIM",
+        "energy": "13",
+        "comment": "Z->MuMu Sherpa sample in 2016 pre-UL campaign",
+    },
+    {
         "process_name": "DYToLL_NLO_5FS_TuneCH3_13TeV_matchbox_herwig7",
         "cross_section": "1976",
         "DAS": "/DYToLL_NLO_5FS_TuneCH3_13TeV_matchbox_herwig7/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",

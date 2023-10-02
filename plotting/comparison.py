@@ -39,7 +39,6 @@ if args.debug:
 ## load coffea files
 output = load_coffea(config, config["scaleToLumi"])
 
-
 ## build up merge map
 mergemap = {}
 if not any(".coffea" in o for o in output.keys()):
@@ -70,12 +69,16 @@ if "rescale_yields" in config.keys():
     collated = additional_scale(collated, config["rescale_yields"])
 
 ### style settings
-if "Run" in list(config["reference"].keys())[0]:
-    hist_type = "errorbar"
-    label = "Preliminary"
+#if "Run" in list(config["reference"].keys())[0]:
+if config["scaleToLumi"]:
+    lumi=config["lumi"] / 1000.0,
 else:
-    hist_type = "step"
-    label = "Simulation Preliminary"
+    lumi = None
+hist_type = "step"
+if config["label"]:
+    label = config["label"]
+else:
+    label = "Preliminary"
 
 ## collect variable lists
 if "all" in list(config["variable"].keys())[0]:
@@ -109,8 +112,16 @@ for var in var_set:
         2, 1, figsize=(10, 10), gridspec_kw={"height_ratios": (3, 1)}, sharex=True
     )
     fig.subplots_adjust(hspace=0.06, top=0.92, bottom=0.1, right=0.97)
-    hep.cms.label(label, com=config["com"], data=True, loc=0, ax=ax)
+    if config["year"]: year=config["year"]
+    else: year = None
+    hep.cms.label(label, lumi=lumi, year=year, com=config["com"], data=True, loc=0, ax=ax)
     ## plot reference
+
+    if refname=="DATA":
+        hist_type = "errorbar"
+    else:
+        hist_type = "step"
+       
     hep.histplot(
         collated[refname][var],
         label=config["reference"][refname]["label"] + " (Ref)",
@@ -122,6 +133,12 @@ for var in var_set:
     ## plot compare list
     for c, s in config["compare"].items():
         # print(collated[c][var][{var:sum}])
+        #print (c, s)
+        if c=="DATA":
+            hist_type = "errorbar"
+        else:
+            hist_type = "step"
+       
         hep.histplot(
             collated[c][var],
             label=config["compare"][c]["label"],
@@ -151,7 +168,10 @@ for var in var_set:
 
     ax.get_yaxis().get_offset_text().set_position((-0.065, 1.05))
     ax.legend()
-    rax.set_ylim(0.0, 2.0)
+    if 'ratio_ylim' in config.keys():
+        rax.set_ylim(config["ratio_ylim"]["min"], config["ratio_ylim"]["max"])
+    else:
+        rax.set_ylim(0,2)
     xmin, xmax = autoranger(collated[refname][var])
     rax.set_xlim(xmin, xmax)
     at = AnchoredText(
