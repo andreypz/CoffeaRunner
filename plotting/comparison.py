@@ -25,7 +25,6 @@ parser.add_argument("--cfg", type=str, required=True, help="Configuration files"
 parser.add_argument(
     "--debug", action="store_true", help="Run detailed checks of yaml file"
 )
-parser.add_argument
 args = parser.parse_args()
 
 # load config from yaml
@@ -75,7 +74,7 @@ if config["scaleToLumi"]:
 else:
     lumi = None
 hist_type = "step"
-if config["label"]:
+if "label" in config.keys():
     label = config["label"]
 else:
     label = "Preliminary"
@@ -112,7 +111,7 @@ for var in var_set:
         2, 1, figsize=(10, 10), gridspec_kw={"height_ratios": (3, 1)}, sharex=True
     )
     fig.subplots_adjust(hspace=0.06, top=0.92, bottom=0.1, right=0.97)
-    if config["year"]: year=config["year"]
+    if 'year' in config.keys(): year=config["year"]
     else: year = None
     hep.cms.label(label, lumi=lumi, year=year, com=config["com"], data=True, loc=0, ax=ax)
     ## plot reference

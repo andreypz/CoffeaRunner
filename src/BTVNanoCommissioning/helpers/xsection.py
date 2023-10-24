@@ -1040,6 +1040,13 @@ xsection = [
         "comment": "Z->MuMu Sherpa sample in 2016 pre-UL campaign",
     },
     {
+        "process_name": "DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7",
+        "cross_section": "6077.22",
+        "DAS": "DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/*/NANOAODSIM",
+        "energy": "13",
+        "comment": "Z->LL MG MLLM _ Herwig sample in 2016 pre-UL campaign",
+    },
+    {
         "process_name": "DYToLL_NLO_5FS_TuneCH3_13TeV_matchbox_herwig7",
         "cross_section": "1976",
         "DAS": "/DYToLL_NLO_5FS_TuneCH3_13TeV_matchbox_herwig7/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
