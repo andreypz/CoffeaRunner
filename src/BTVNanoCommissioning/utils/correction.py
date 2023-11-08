@@ -686,8 +686,16 @@ def btagSFs(jet, correct_map, weights, SFtype, syst=False):
 
 ### Lepton SFs
 def eleSFs(ele, correct_map, weights, syst=True, isHLT=False):
-    allele = ele if ele.ndim > 1 else ak.singletons(ele)
+    if ele.ndim > 1:
+        allele = ele
+    else:
+        allele = ak.singletons(ele)
+        allele = ak.pad_none(allele, 1, axis=1)
+
+
     for sf in correct_map["EGM_cfg"].keys():
+        #print("SF = ", sf)
+
         ## Only apply SFs for lepton pass HLT filter
         if not isHLT and "HLT" in sf:
             continue
@@ -696,22 +704,22 @@ def eleSFs(ele, correct_map, weights, syst=True, isHLT=False):
             continue
         for nele in range(ak.num(allele.pt)[0]):
             ele = allele[:, nele]
-            ele_eta = ak.fill_none(ele.eta, -2.5)
-            ele_pt = ak.fill_none(ele.pt, 20)
             mask = ele.pt > 20.0
-            masknone = ak.is_none(ele.pt)
+            masknone = ak.is_none(ele.pt) | ak.fill_none(abs(ele.lep_flav)!=11 , False)
+
+            ele_eta = ak.fill_none(ele.eta, -2.5)
+            ele_pt = ak.fill_none(np.where(ele.pt < 20.0, 20.0, ele.pt)    , 20)
+            ele_pt_low = ak.fill_none(np.where(ele.pt >= 20.0, 19.9, ele.pt) , 19.9)
+
+
             sfs_alle, sfs_alle_up, sfs_alle_down = (
                 np.ones_like(allele[:, 0].pt),
                 np.ones_like(allele[:, 0].pt),
                 np.ones_like(allele[:, 0].pt),
             )
-
             if "correctionlib" in str(type(correct_map["EGM"])):
                 ## Reco SF -splitted pT
                 if "Reco" in sf:
-                    ele_pt = np.where(ele.pt < 20.0, 20.0, ele.pt)
-                    ele_pt_low = np.where(ele.pt >= 20.0, 19.9, ele.pt)
-
                     sfs_low = np.where(
                         (~mask) & (~masknone),
                         correct_map["EGM"][list(correct_map["EGM"].keys())[0]].evaluate(
@@ -883,7 +891,13 @@ def eleSFs(ele, correct_map, weights, syst=True, isHLT=False):
 
 
 def muSFs(mu, correct_map, weights, syst=False, isHLT=False):
-    allmu = mu if mu.ndim > 1 else ak.singletons(mu)
+    if mu.ndim > 1:
+        allmu = mu
+    else:
+        allmu = ak.singletons(mu)
+        allmu = ak.pad_none(allmu, 1, axis=1)
+    #print("Allmu", allmu)
+
     for sf in correct_map["MUO_cfg"].keys():
         ## Only apply SFs for lepton pass HLT filter
         if not isHLT and "HLT" in sf:
@@ -898,17 +912,21 @@ def muSFs(mu, correct_map, weights, syst=False, isHLT=False):
         sf_type = sf[: sf.find(" ")]
         for nmu in range(ak.num(allmu.pt)[0]):
             mu = allmu[:, nmu]
-            masknone = ak.is_none(mu.pt)
-            # mu_eta = ak.fill_none(np.where(np.abs(mu.eta) >= 2.4, 2.39, np.abs(mu.eta)),2.39)
-            # mu_pt = ak.fill_none(mu.pt,30)
-            mu_pt = mu.pt
-            mu_eta = np.where(np.abs(mu.eta) >= 2.4, 2.39, np.abs(mu.eta))
+            masknone = ak.is_none(mu.pt) | ak.fill_none(abs(mu.lep_flav)!=13,  False)
+            #print ("Mu pT not-Nones: ", mu.pt[~masknone])
+
+            #mu_pt = mu.pt
+            #mu_eta = np.where(np.abs(mu.eta) >= 2.4, 2.39, np.abs(mu.eta))
+            mu_eta = ak.fill_none(np.where(np.abs(mu.eta) >= 2.4, 2.39, np.abs(mu.eta)),2.39)
+            
+            mu_pt = ak.fill_none(np.where(mu.pt < 30, 30, mu.pt), 30)
+            mu_pt_low = ak.fill_none(np.where(mu.pt >= 30, 30, mu.pt), 30)
+
+
             mask = mu_pt > 30
             sfs = 1.0
             if "correctionlib" in str(type(correct_map["MUO"])):
                 if "ID" in sf or "Reco" in sf:
-                    mu_pt = ak.fill_none(np.where(mu.pt < 30, 30, mu.pt), 30)
-                    mu_pt_low = ak.fill_none(np.where(mu.pt >= 30, 30, mu.pt), 30)
                     sfs_low = np.where(
                         ~mask & ~masknone,
                         correct_map["MUO_custom"][
@@ -922,7 +940,7 @@ def muSFs(mu, correct_map, weights, syst=False, isHLT=False):
                         correct_map["MUO"][correct_map["MUO_cfg"][sf]].evaluate(
                             sf.split(" ")[1], mu_eta, mu_pt, "sf"
                         ),
-                        sfs_low,
+                        sfs_low
                     )
                     sfs = np.where(masknone, 1.0, sfs)
                     sfs_forerr = sfs
@@ -1001,8 +1019,9 @@ def muSFs(mu, correct_map, weights, syst=False, isHLT=False):
                         )
 
             sfs_allmu = sfs_allmu * sfs
-            sfs_allmu_down = sfs_allmu_down * sfs_down
-            sfs_allmu_up = sfs_allmu_up * sfs_up
+            if syst:
+                sfs_allmu_down = sfs_allmu_down * sfs_down
+                sfs_allmu_up = sfs_allmu_up * sfs_up
         if syst:
             weights.add(sf.split(" ")[0], sfs_allmu, sfs_allmu_up, sfs_allmu_down)
         else:
