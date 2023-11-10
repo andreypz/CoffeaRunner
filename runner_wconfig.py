@@ -147,8 +147,8 @@ if __name__ == "__main__":
         ]
         condor_extra = [
             f"cd {os.getcwd()}",
-            f'source {os.environ["HOME"]}/.bashrc',
-            f"source {os.getcwd()}/CondaSetup.sh",
+            f'source {os.environ["HOME"]}/.bashrc', # Conda should be setup by your bashrc script!
+            #f"source {os.getcwd()}/CondaSetup.sh",
             f'conda activate {os.environ["CONDA_PREFIX"]}',
         ]
 
